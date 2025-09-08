@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Feedback</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    .feedback { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+    button { padding: 8px 12px; margin-top: 5px; }
+  </style>
+  <script>
+    async function summarizeFeedback() {
+      const comment = document.getElementById("comment").value;
+      const res = await fetch("/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "comment=" + encodeURIComponent(comment)
+      });
+      const data = await res.json();
+      document.getElementById("comment").value = data.summary;
+    }
+  </script>
+</head>
+<body>
+  <h1>📋 Student Feedback Form</h1>
+
+  <form action="/add" method="POST">
+    <input type="text" name="student" placeholder="Student Name" required>
+    <textarea id="comment" name="comment" placeholder="Enter feedback..." required></textarea>
+    <button type="submit">➕ Add Feedback</button>
+    <button type="button" onclick="summarizeFeedback()">✨ Summarize</button>
+  </form>
+
+  <h2>All Feedback</h2>
+  {% for f in feedbacks %}
+    <div class="feedback">
+      <strong>{{f[1]}}</strong>: {{f[2]}}
+      <form action="/update/{{f[0]}}" method="POST" style="margin-top:5px;">
+        <input type="text" name="student" value="{{f[1]}}">
+        <textarea name="comment">{{f[2]}}</textarea>
+        <button type="submit">✏️ Update</button>
+      </form>
+      <a href="/delete/{{f[0]}}"><button type="button">🗑️ Delete</button></a>
+    </div>
+  {% endfor %}
+</body>
+</html>
